@@ -7,7 +7,7 @@ from bot.bot_setting import *
 intents = discord.Intents.default()                                             # Подключаем "Разрешения"
 intents.message_content = True
 
-arkBot = commands.Bot(command_prefix='?', intents=intents)                      # Задаём префикс и интенты
+arkBot = commands.Bot(command_prefix=settings['prefix'], intents=intents)                      # Задаём префикс и интенты
 
 # С помощью декоратора создаём первую команду
 @arkBot.command()

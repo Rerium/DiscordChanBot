@@ -1,3 +1,5 @@
 settings = {  
         'token'   : '',
+        'prefix'  : '',
+        
         }
