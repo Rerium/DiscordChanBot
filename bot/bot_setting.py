@@ -1,5 +1,5 @@
 settings = {  
         'token'   : '',
-        'prefix'  : '',
+        'prefix'  : '?',
         
         }
