@@ -20,7 +20,7 @@ class database:
             self.db_port = port
             db_connection_t = mariadb.connect (user = self.db_user, password = self.db_pass, database = self.db_name, host = self.db_host, port = self.db_port )
             self.db_connection = db_connection_t
-            print('Подключение к базе данных выполнено успешно', self.db_connection)
+            print('Подключение к базе данных выполнено успешно')
             
         except Error as error:
             print(f'Ошибка подключения к БД: {error}')
@@ -29,13 +29,13 @@ class database:
 
     def db_close(self):
         self.db_connection.close()
-        print('Подключение к базе данных закрыто')
+        #print('Подключение к базе данных закрыто')
         pass
 
     def db_conntion(self):
         try:
             self.db_connection = mariadb.connect (user = self.db_user, password = self.db_pass, database = self.db_name, host = self.db_host, port = self.db_port )
-            print('Подключение к базе данных выполнено успешно', self.db_connection)
+            #print('Подключение к базе данных выполнено успешно', self.db_connection)
         except Error as error:
             print(f'Ошибка подключения к БД: {error}')
 
@@ -102,20 +102,16 @@ class database:
         return result
     
     def db_table_check(self):
-        self.db_conntion()
         cursor = self.db_connection.cursor()
         sql = "SHOW TABLES FROM "+ self.db_name
         cursor.execute(sql)
         result = cursor.fetchone()
-        self.db_close()
         return result
 
     def db_table_create_init(self):
-        self.db_conntion()
         cursor = self.db_connection.cursor()
         sql = "CREATE TABLE IF NOT EXISTS `DiscordChanBot`.`users` (`user_id` BIGINT NOT NULL , `username` VARCHAR(32) NOT NULL , `global_name` VARCHAR(32) NOT NULL , `exp` INT NOT NULL DEFAULT '0' ) ENGINE = InnoDB; "
         cursor.execute(sql)
         self.db_connection.commit()
-        self.db_close()
         pass
 
