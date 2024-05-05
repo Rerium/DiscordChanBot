@@ -1,6 +1,17 @@
-from bot.bot_main import arkBot
+from bot.bot_main import arkBot, base
 from bot.phrases import phrases, command
 import disnake, random
+
+
+
+def handel_message(message):
+    if message.author.bot:
+        pass
+    else:
+        if (base.db_read_user(message.author.id)==None):
+             base.db_user_create(message.author.global_name, message.author.name, message.author.id)
+        base.db_user_exp_add(message.author.id, random.randint(10, 30))
+    pass
 
 # Реакция на загрузку бота
 @arkBot.event
@@ -20,6 +31,10 @@ async def on_message(message):
             embed.add_field(name = 'Лучший донат?', value =str(phrases['donate']), inline = False)   
 
             await message.channel.send(embed=embed)
-            
+    
+    handel_message(message)
+    
+
     await arkBot.process_commands(message)
     pass
+
