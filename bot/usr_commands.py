@@ -43,9 +43,4 @@ async def info(message: disnake.ApplicationCommandInteraction):
 async def dice(message):
     await message.send(str(random.randrange(6)+1))
 
-# информация о сервере
-@arkBot.slash_command(description="Информация о сервере")
-async def server(message):
-    await message.response.send_message(
-        f"Название сервера: {message.guild.name}\nВсего участников: {message.guild.member_count}"
-    )
+

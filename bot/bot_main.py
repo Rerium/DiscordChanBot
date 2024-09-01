@@ -1,4 +1,4 @@
-if __name__ == "__main__": 
+if __name__ == "__main__":
     print ("Please run main.py")
     exit()
 
@@ -7,7 +7,7 @@ import disnake
 from disnake.ext import commands
 
 
-from bot.bot_setting import settings, db
+from bot.bot_setting import settings_bot, settings_db
 from database.db import *
 
 #   Инициализируем бота
@@ -17,23 +17,21 @@ intents.guilds = True
 intents.members = True
 intents.messages = True
 
-arkBot = commands.Bot(command_prefix=settings['prefix'], intents=intents, sync_commands_debug=False)                       # Задаём префикс и интенты
+command_flags = commands.CommandSyncFlags.default()
+command_flags.sync_commands_debug = True
 
-base = database(db['user'], db['password'], db['database'], db['host'], db['port'])
-if (base.db_table_check() == None):
-    base.db_table_create_init()
-    print('Таблица создана')
-else:
-    print('Таблица уже существует')
-    
+arkBot = commands.Bot(command_prefix=settings_bot['prefix'], intents=intents, command_sync_flags=command_flags )                       # Задаём префикс и интенты
+
+base = database(settings_db['user'], settings_db['password'], settings_db['database'], settings_db['host'], settings_db['port'])
 base.db_close()
 
 
-import bot.commands
+import bot.usr_commands
+import bot.adm_commands
 import bot.events
 # Функция запускающая бота и все его зависимости 
 def botStart():
     
 
-    arkBot.run(settings['token'])
+    arkBot.run(settings_bot['token'])
     pass    

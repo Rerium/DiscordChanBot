@@ -1,4 +1,3 @@
-from queue import Full
 import mysql.connector as mariadb
 from mysql.connector import Error
 
@@ -11,7 +10,7 @@ class database:
     db_port = ''
     db_connection = object()
     
-    def __init__ (self, user, password, name, host, port):
+    def __init__ (self, user:str, password:str, name:str, host:str, port:int):
         try:
             self.db_user = user
             self.db_pass = password
@@ -32,7 +31,7 @@ class database:
         #print('Подключение к базе данных закрыто')
         pass
 
-    def db_conntion(self):
+    def db_connect(self):
         try:
             self.db_connection = mariadb.connect (user = self.db_user, password = self.db_pass, database = self.db_name, host = self.db_host, port = self.db_port )
             #print('Подключение к базе данных выполнено успешно', self.db_connection)
@@ -41,76 +40,110 @@ class database:
 
         pass
     
-    def db_read_user(self, user_id):
-        self.db_conntion()
+    def db_user_read(self, user_id:int, guild:int):
+        self.db_connect()
         cursor = self.db_connection.cursor()
-        sql = "SELECT * FROM users WHERE user_id = %s"
-        values = (user_id,)
-        cursor.execute(sql, values)
+        sql = "SELECT * FROM `users_"+ str(guild) +"` WHERE user_id = " + str(user_id)
+        cursor.execute(sql)
         result = cursor.fetchone()
         self.db_close()
         return result
         
-    def db_user_exp_add(self, user_id, exp):
-        self.db_conntion()
+    def db_user_exp_add(self, user_id:int, exp:int, guild:int):
+        self.db_connect()
         cursor = self.db_connection.cursor()
-        sql = "UPDATE users SET exp = exp + %s WHERE user_id = %s"
-        values = (exp, user_id)
-        cursor.execute(sql, values)
+        sql = "UPDATE `users_"+ str(guild) +"` SET exp = exp + " + str(exp) + " WHERE user_id = `" + str(user_id) +"`" 
+        cursor.execute(sql)
         self.db_connection.commit()
         self.db_close()
         pass
 
-    def db_user_upd_nickname(self, user_id, nickname):
-        self.db_conntion()
+    def db_user_upd_nickname(self, user_id:int, nickname:str, guild):
+        self.db_connect()
         cursor = self.db_connection.cursor()
-        sql = "UPDATE users SET global_name = %s WHERE user_id = %s"
-        values = (nickname, user_id)
-        cursor.execute(sql, values)
+        sql = "UPDATE `users_"+ str(guild) +"` SET global_name = "+ nickname + " WHERE user_id = " + str(user_id)
+        cursor.execute(sql)
         self.db_connection.commit()
         self.db_close()
         pass
 
-    def db_user_upd_username(self, user_id, username):
-        self.db_conntion()
+    def db_user_upd_username(self, user_id:int, username:str, guild:int):
+        self.db_connect()
         cursor = self.db_connection.cursor()
-        sql = "UPDATE users SET username = %s WHERE user_id = %s"
-        values = (username, user_id)
-        cursor.execute(sql, values)
+        sql = "UPDATE `users_"+ str(guild) +"` SET username = " + username +" WHERE user_id = " + str(user_id)
+        cursor.execute(sql)
         self.db_connection.commit()
         self.db_close()
         pass
 
-    def db_user_create(self, nickname, username, user_id):
-        self.db_conntion()
+    def db_user_create(self, nickname:str, username:str, user_id:int, guild:int):
+        self.db_connect()
         cursor = self.db_connection.cursor()
-        sql = "INSERT INTO users (global_name, username, user_id) VALUES (%s, %s, %s)"
+        sql = "INSERT INTO `users_"+ str(guild) +"` (global_name, username, user_id) VALUES (%s, %s, %s)"
         values = (nickname, username, user_id)
         cursor.execute(sql, values)
         self.db_connection.commit()
         self.db_close()
         pass
 
-    def db_user_search(self, user_id):
-        self.db_conntion()
+    def db_admin_create(self, user_id:int, guild:int):
+        self.db_connect()
         cursor = self.db_connection.cursor()
-        sql = "SELECT * FROM users WHERE user_id = %s"
+        sql = "INSERT INTO `admins_"+ str(guild) +"` (user_id) VALUES (%s)"
+        values = (user_id,)
+        cursor.execute(sql, values)
+        self.db_connection.commit()
+        self.db_close()
+        pass
+
+    def db_admin_search(self, user_id:int, guild:int) -> tuple:
+        self.db_connect()
+        cursor = self.db_connection.cursor()
+        sql = "SELECT * FROM `admins_"+ str(guild) +"` WHERE user_id = %s"
+        values = (user_id,)
+        cursor.execute(sql, values)
+        result = cursor.fetchone()
+        self.db_close()
+        return result
+
+    def db_admin_del(self, user_id:int, guild:int):
+        self.db_connect()
+        cursor = self.db_connection.cursor()
+        sql = "DELETE FROM `admins_"+ str(guild) +"` WHERE user_id = %s"
+        values = (user_id,)
+        cursor.execute(sql, values)
+        self.db_connection.commit()
+        self.db_close()
+        pass
+
+    def db_close(self):
+        self.db_connection.close()
+        pass
+
+
+
+    def db_user_search(self, user_id:int, guild:int) -> tuple:
+        self.db_connect()
+        cursor = self.db_connection.cursor()
+        sql = "SELECT * FROM `users_"+ str(guild) +"` WHERE user_id = %s"
         values = (user_id,)
         cursor.execute(sql, values)
         result = cursor.fetchone()
         self.db_close()
         return result
     
-    def db_table_check(self):
+    def db_table_check(self, guild:int):
         cursor = self.db_connection.cursor()
-        sql = "SHOW TABLES FROM "+ self.db_name
+        sql = "SHOW TABLES LIKE `users_"+ str(guild) +"` FROM "+ self.db_name
         cursor.execute(sql)
         result = cursor.fetchone()
         return result
 
-    def db_table_create_init(self):
+    def db_table_create_init(self, guild: int) -> object:
         cursor = self.db_connection.cursor()
-        sql = "CREATE TABLE IF NOT EXISTS `DiscordChanBot`.`users` (`user_id` BIGINT NOT NULL , `username` VARCHAR(32) NOT NULL , `global_name` VARCHAR(32) NOT NULL , `exp` INT NOT NULL DEFAULT '0' ) ENGINE = InnoDB; "
+        sql = "CREATE TABLE IF NOT EXISTS `DiscordChanBot`.`users_"+ str(guild) +"`  (`user_id` BIGINT NOT NULL , `username` VARCHAR(32) NOT NULL , `global_name` VARCHAR(32) NOT NULL , `exp` INT NOT NULL DEFAULT '0' ) ENGINE = InnoDB; "
+        cursor.execute(sql)
+        sql = "CREATE TABLE IF NOT EXISTS `DiscordChanBot`.`admins_"+ str(guild) +"` (`user_id` BIGINT NOT NULL) ENGINE = InnoDB; "
         cursor.execute(sql)
         self.db_connection.commit()
         pass
